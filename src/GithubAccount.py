@@ -13,6 +13,7 @@ class GithubAccount:
 		self.followers = 0           # Number of followers
 		self.following = 0           # Number of following
 		self.avatar    = avatar_path # Local path to avatar
+		self.avatar_url= ""          # Url to avatar image
 		self.repos     = []          # List with repositories
 
 	def download(self):
@@ -27,10 +28,11 @@ class GithubAccount:
 		self.location  = self._parse_user_location(soup)
 		self.followers = self._parse_followers(soup)
 		self.following = self._parse_following(soup)
+		self.avatar_url= self._parse_avatar_url(soup)
 		self.repos     = self._parse_repositories(soup)
 
 		# TODO: download/save avatar image
-		#img_data = requests.get(self._parse_avatar_url(soup)).content
+		#img_data = requests.get(self.avatar_url).content
 		#with open(file, 'wb') as file:
 		#    file.write(img_data)
 		return True
