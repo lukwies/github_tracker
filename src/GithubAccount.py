@@ -7,8 +7,8 @@ from dateutil import tz
 class GithubAccount:
 	def __init__(self, username, avatar_path=''):
 		self.username  = username    # Github username
-		self.name      = ""          # Real name
-		self.info      = ""          # User info/description
+		self.realname  = ""          # Real name
+		self.userinfo  = ""          # User info/description
 		self.location  = ""          # User location
 		self.followers = 0           # Number of followers
 		self.following = 0           # Number of following
@@ -17,17 +17,13 @@ class GithubAccount:
 
 	def download(self):
 		url  = f"https://github.com/{self.username}?tab=repositories"
-		resp = requests.get(url)
+		soup = self._get_soup(url)
 
-		if resp.status_code != 200:
-			print(f"! Error: Failed to send request to {url}")
-			print(f"         Status-code={resp.status_code}")
+		if not soup:
 			return False
 
-		soup = BeautifulSoup(resp.text, 'html.parser')
-
-		self.name      = self._parse_real_name(soup)
-		self.info      = self._parse_user_info(soup)
+		self.realname  = self._parse_real_name(soup)
+		self.userinfo  = self._parse_user_info(soup)
 		self.location  = self._parse_user_location(soup)
 		self.followers = self._parse_followers(soup)
 		self.following = self._parse_following(soup)
@@ -42,8 +38,8 @@ class GithubAccount:
 
 	def print(self):
 		print(f'Username:  {self.username}')
-		print(f'Realname:  {self.name}')
-		print(f'Userinfo:  {self.info}')
+		print(f'Realname:  {self.realname}')
+		print(f'Userinfo:  {self.userinfo}')
 		print(f'Location:  {self.location}')
 		print(f'Follower:  {self.followers}')
 		print(f'Following: {self.following}')
@@ -80,9 +76,24 @@ class GithubAccount:
 
 			# Get last commit time and convert to localtime
 			x = li.find('relative-time')['datetime'] #.get_text()
-			repo['lastupdate'] = get_localtime_from_utcstr(x)
+			repo['last_update'] = get_localtime_from_utcstr(x)
+
+			# Get url where repo is forked from
+			x = li.find('a', {'class', 'Link--muted'})
+			repo['forked_from'] = '' if not x else x['href']
+
+			# Get repository descriptioin
+			x = li.find('p', {'class':'col-9', 'itemprop':'description'})
+			repo['description'] = '' if not x else x.get_text().strip()
 
 			repos.append(repo)
+
+		# If there's a next page with repository, download/parse it ...
+		x = soup.find('a', {'class':'next_page', 'rel':'next'})
+		if x:
+			url  = 'https://github.com' + x['href']
+			soup = self._get_soup(url)
+			repos.append(self._parse_repositories(soup))
 
 		return repos
 
@@ -110,3 +121,14 @@ class GithubAccount:
 	def _parse_user_location(self, soup):
 		loc = soup.find('span', {'class':'p-label'})
 		return '' if not loc else loc.get_text()
+
+	def _get_soup(self, url):
+		resp = requests.get(url)
+
+		if resp.status_code != 200:
+			print(f"! Error: Failed to send request to {url}")
+			print(f"         Status-code={resp.status_code}")
+			return None
+
+		return BeautifulSoup(resp.text, 'html.parser')
+
