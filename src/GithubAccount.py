@@ -2,21 +2,27 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 from dateutil import tz
-
+import logging
+import os
 
 class GithubAccount:
-	def __init__(self, username, avatar_path=''):
-		self.username  = username    # Github username
-		self.realname  = ""          # Real name
-		self.userinfo  = ""          # User info/description
-		self.location  = ""          # User location
-		self.followers = 0           # Number of followers
-		self.following = 0           # Number of following
-		self.avatar    = avatar_path # Local path to avatar
-		self.avatar_url= ""          # Url to avatar image
-		self.repos     = []          # List with repositories
 
-	def download(self):
+	def __init__(self, username):
+		self.username    = username    	# Github username
+		self.realname    = ""          	# Real name
+		self.userinfo    = ""          	# User info/description
+		self.location    = ""          	# User location
+		self.followers   = 0           	# Number of followers
+		self.following   = 0           	# Number of following
+		self.avatar_url  = ""          	# Url to avatar image
+		self.avatar_file = ""		# Local path to avatar file
+		self.repos       = []          	# List with repositories
+
+
+	def download(self, avatar_directory=None):
+
+		logging.info(f"Downloading account '{self.username}' ...")
+
 		url  = f"https://github.com/{self.username}?tab=repositories"
 		soup = self._get_soup(url)
 
@@ -31,10 +37,9 @@ class GithubAccount:
 		self.avatar_url= self._parse_avatar_url(soup)
 		self.repos     = self._parse_repositories(soup)
 
-		# TODO: download/save avatar image
-		#img_data = requests.get(self.avatar_url).content
-		#with open(file, 'wb') as file:
-		#    file.write(img_data)
+		# download/save avatar image
+		self._download_avatar(avatar_directory)
+
 		return True
 
 
@@ -95,7 +100,7 @@ class GithubAccount:
 		if x:
 			url  = 'https://github.com' + x['href']
 			soup = self._get_soup(url)
-			repos.append(self._parse_repositories(soup))
+			repos.extend(self._parse_repositories(soup))
 
 		return repos
 
@@ -133,4 +138,16 @@ class GithubAccount:
 			return None
 
 		return BeautifulSoup(resp.text, 'html.parser')
+
+	def _download_avatar(self, avatar_directory):
+		self.avatar_file = avatar_directory + '/' + self.username + '.jpg'
+
+		# Only download avatar image if it does not already exist
+		if not os.path.isfile(self.avatar_file):
+
+			logging.info(f"Downloading avatar to '{self.avatar_file}' ...")
+			img_data = requests.get(self.avatar_url).content
+
+			with open(self.avatar_file, 'wb') as file:
+				file.write(img_data)
 
