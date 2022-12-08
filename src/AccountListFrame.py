@@ -35,8 +35,7 @@ class AccountListFrame(tk.Frame):
 		self.account   = account
 		self.tracker   = tracker
 		self.avatar    = tk.Label(self)
-		self.btnDelete = tk.Button(self, text='Delete', font='Arial 7', fg='red')
-		self.btnView   = tk.Button(self, text='View', font='Arial 7')
+		self.btnDelete = tk.Button(self, text='X', font='Arial 7', fg='red')
 		self.__setup()
 
 
@@ -51,20 +50,18 @@ class AccountListFrame(tk.Frame):
 		self.avatar.grid(row=0, column=0, rowspan=4, sticky='nw')
 
 		# Labels
-		lbls = self._get_labelpanel()
-		lbls.grid(row=0, column=1, rowspan=4, sticky='nswe', padx=5)
+		self.lbls = self._get_labelpanel()
+		self.lbls.grid(row=0, column=1, rowspan=4, sticky='nswe', padx=5)
 
 		# Buttons
-		self.btnView.grid(row=0, column=2, sticky='nswe')
-		self.btnDelete.grid(row=1, column=2, sticky='nswe')
-		self.btnView.configure(highlightbackground='#bcbcbc',
+		self.btnDelete.grid(row=0, column=2, sticky='nw')
+		self.btnDelete.configure(highlightbackground='#bcbcbc',
 			highlightthickness=1)
 
 
 	def _get_labelpanel(self):
 		win = tk.PanedWindow(self, cursor='hand2')
 		win.grid_columnconfigure(1, weight=1)
-		win.bind('<Button-1>', self._open_account)
 
 		self._lbl(win, self.account.username, 'Arial 11 bold').grid(row=0, column=0, sticky='nswe', columnspan=2)
 
@@ -83,10 +80,13 @@ class AccountListFrame(tk.Frame):
 
 		return win
 
+
 	def _lbl(self, parent, text, font='Arial 10 bold'):
-		return tk.Label(parent, text=text, font=font,
-			justify='left', anchor='w', padx=5)
+		lbl = tk.Label(parent, text=text, font=font,
+				justify='left', anchor='w', padx=5)
+		lbl.bind('<Button-1>', self._open_account)
+		return lbl
 
+	def _open_account(self, ev):
+		self.tracker.view.open_account_view(self.account)
 
-	def _open_account(self):
-		self.tracker.view.open_account(self.account)
