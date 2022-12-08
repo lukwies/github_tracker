@@ -54,6 +54,7 @@ class Sidebar(tk.Frame):
 
 		self.configure(bg='#676767', width=200)
 
+
 class RepoList(tk.Frame):
 	def __init__(self, parent, account, tracker):
 		super().__init__(parent)
