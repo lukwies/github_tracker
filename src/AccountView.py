@@ -29,8 +29,13 @@ class AccountView(tk.Frame):
 
 	def __setup(self):
 		self.grid_columnconfigure(1, weight=1)
+		self.grid_rowconfigure(0, weight=1)
+
 		self.sideFrame.grid(row=0, column=0, sticky='nswe')
 		self.repoFrame.grid(row=0, column=1, sticky='nswe')
+
+		tk.Button(self.tracker.view.statusbar, text='Back',
+			command=self.tracker.view.open_account_list_view).grid(row=0, column=0)
 
 
 
@@ -42,34 +47,55 @@ class Sidebar(tk.Frame):
 		self.__setup()
 
 	def __setup(self):
-		self.img = ImageTk.PhotoImage(Image.open(self.account.avatar_file).resize((160,160)))
-		tk.Label(self, image=self.img).grid(row=0, column=0, columnspan=2, sticky='nw')
+		self.img = ImageTk.PhotoImage(Image.open(self.account.avatar_file).resize((180,180)))
+		tk.Label(self, image=self.img).grid(row=0, column=0, columnspan=2, sticky='nw', padx=3, pady=3)
 
 		URLLabel(self, self.account.username, 'https://github.com/' + self.account.username,
-				font='Arial 12 bold').grid(row=1, column=0, columnspan=2, sticky='nswe')
+				font='Arial 14 bold').grid(row=1, column=0, columnspan=2, sticky='swe', padx=3)
 		rowi=2
 
 		if self.account.realname != '':
-			make_label(self, self.account.realname, 'Arial 11').grid(
-					row=rowi, column=0, columnspan=2, sticky='nswe')
+			make_label(self, self.account.realname, 'Arial 9', 'grey').grid(
+					row=rowi, column=0, columnspan=2, sticky='nwe', padx=3)
 			rowi += 1
 
 		if self.account.location != '':
-			make_label(self, self.account.location, 'Arial 10').grid(
-					row=rowi, column=0, columnspan=2, sticky='nswe')
+			make_label(self, 'Location: ' + self.account.location, 'Arial 10', 'grey').grid(
+					row=rowi, column=0, columnspan=2, sticky='nswe', padx=3)
 			rowi += 1
 
 		if self.account.userinfo != '':
 			info = '\n'.join(textwrap.wrap(self.account.userinfo, 30))
 			make_label(self, info, 'Arial 9').grid(
-					row=rowi, column=0, columnspan=2, sticky='nswe')
+					row=rowi, column=0, columnspan=2, sticky='nwe', padx=3, pady=5)
 			rowi += 1
 
-		self.grid_columnconfigure(0, minsize=160)
-		self.grid_rowconfigure(4, weight=1)
-		self.configure(bg='#939393')
+		s = f'Followers: {self.account.followers}\nFollowing: {self.account.following}'
+		LeftLabel(self, text=s).grid(row=rowi, column=0, columnspan=2, sticky='nswe', padx=3)
+		rowi += 1
+
+		self.grid_rowconfigure(6, weight=1)
+		self.configure(bg='#535353')
 
 
+class RepoList(ScrollFrame):
+	def __init__(self, parent, account, tracker):
+		super().__init__(parent)
+		self.account = account
+		self.tracker = tracker
+		self.__setup()
+
+	def __setup(self):
+#		self.scroll_frame.configure(width=300, bg='#ababab')
+#		self.grid_columnconfigure(0, weight=1)
+
+		for i, repo in enumerate(self.account.repos):
+#			RepoListItem(self.scroll_frame, repo, self.tracker).pack(
+#				fill='x', expand=True)
+			RepoListItem(self.scroll_frame, repo, self.tracker).grid(
+				row=i, column=0, sticky='nswe')
+
+'''
 class RepoList(tk.Frame):
 	def __init__(self, parent, account, tracker):
 		super().__init__(parent)
@@ -86,6 +112,7 @@ class RepoList(tk.Frame):
 				row=i, column=0, sticky='nswe')
 			if i == 4:
 				break
+'''
 
 
 '''
@@ -107,12 +134,12 @@ class RepoListItem(tk.Frame):
 		self.__setup()
 
 	def __setup(self):
-		self.configure(width=300, bg='#ababab', padx=5, pady=3,
+		self.configure(width=400, bg='#ababab', padx=5, pady=3,
 				highlightbackground="#323232", highlightthickness=1)
 		self.grid_columnconfigure(1, weight=1)
 
 		URLLabel(self, self.repo['name'], 'https://github.com' + self.repo['url'],
-				font='Arial 10 bold').grid(row=0, column=0, columnspan=2, sticky='nswe')
+				font='Arial 12 bold').grid(row=0, column=0, columnspan=2, sticky='nswe')
 		make_label(self, self.repo['language'], 'Arial 8', '#989898').grid(
 				row=0, column=2, sticky='nswe')
 
