@@ -26,3 +26,4 @@ class URLLabel(tk.Label):
 
 	def openURL(self, ev):
 		webbrowser.open_new_tab(self.url)
+
