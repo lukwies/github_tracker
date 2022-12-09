@@ -15,6 +15,7 @@ class View:
 		self.tracker = tracker
 		self.root = tk.Tk()
 		self.root.title('github tracker')
+		self.root.geometry('640x400')
 
 		self.menu = tk.Menu(self.root)
 		self.root.configure(menu=self.menu)
@@ -34,7 +35,7 @@ class View:
 
 	def open_account_list_view(self):
 		self.mainframe.destroy()
-		self.mainframe = AccountListView(self.root, tracker)
+		self.mainframe = AccountListView(self.root, self.tracker)
 		self.mainframe.grid(row=0, column=0, sticky='nswe')
 
 	def open_account_view(self, account):
