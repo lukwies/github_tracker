@@ -1,5 +1,36 @@
 import tkinter as tk
+from tkinter import ttk
 import webbrowser
+
+class ScrollFrame(ttk.Frame):
+	'''
+	Scrollable frame.
+	NOTE: If you want to use this class, remember to place things
+	inside self.scrollable_frame, and not directly into an object of this class:
+
+		frame = ScrollableFrame(root)
+
+		for i in range(50):
+			ttk.Label(frame.scrollable_frame, text="Sample scrolling label").pack()
+	'''
+	def __init__(self, container, *args, **kwargs):
+		super().__init__(container, *args, **kwargs)
+		canvas = tk.Canvas(self)
+		scrollbar = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
+		self.scroll_frame = ttk.Frame(canvas)
+
+		self.scroll_frame.bind(
+			"<Configure>",
+			lambda e: canvas.configure(
+				scrollregion=canvas.bbox("all")
+			)
+		)
+
+		canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
+		canvas.configure(yscrollcommand=scrollbar.set)
+
+		canvas.pack(side="left", fill="both", expand=True)
+		scrollbar.pack(side="right", fill="y")
 
 class URLLabel(tk.Label):
 	'''
@@ -27,3 +58,11 @@ class URLLabel(tk.Label):
 	def openURL(self, ev):
 		webbrowser.open_new_tab(self.url)
 
+
+class LeftLabel(tk.Label):
+	'''
+	Left justified label
+	'''
+	def __init__(self, parent, *args, **kwargs):
+		super().__init__(parent, *args, **kwargs)
+		self.configure(anchor='w', justify='left')
