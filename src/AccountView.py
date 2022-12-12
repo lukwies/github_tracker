@@ -2,22 +2,16 @@ import tkinter as tk
 from PIL import Image,ImageTk
 from widgets import *
 import textwrap
-#from AccountListFrame import *
 
 
 
 class AccountView(tk.Frame):
 	'''
-	Frame showing a single Account.
+	Frame showing a single github account and its repositories.
 	'''
 
 	def __init__(self, parent, account, tracker):
-		'''
-		Account list view.
 
-		Args:
-			tracker: GithubTracker instance
-		'''
 		super().__init__(parent)
 
 		self.account = account
@@ -25,6 +19,9 @@ class AccountView(tk.Frame):
 
 		self.sideFrame = Sidebar(self, account, tracker)
 		self.repoFrame = RepoList(self, account, tracker)
+
+		self.btnBack = tk.Button(self.tracker.view.statusbar, text='Back',
+					command=self._go_back)
 		self.__setup()
 
 	def __setup(self):
@@ -34,12 +31,18 @@ class AccountView(tk.Frame):
 		self.sideFrame.grid(row=0, column=0, sticky='nswe')
 		self.repoFrame.grid(row=0, column=1, sticky='nswe')
 
-		tk.Button(self.tracker.view.statusbar, text='Back',
-			command=self.tracker.view.open_account_list_view).grid(row=0, column=0)
+		self.btnBack.grid(row=0, column=0)
 
 
+	def _go_back(self):
+		self.btnBack.destroy()
+		self.tracker.view.open_account_list_view()
 
 class Sidebar(tk.Frame):
+	'''
+	The Sidebar is within the left screen side and shows account
+	information.
+	'''
 	def __init__(self, parent, account, tracker):
 		super().__init__(parent)
 		self.account = account
@@ -79,6 +82,9 @@ class Sidebar(tk.Frame):
 
 
 class RepoList(ScrollFrame):
+	'''
+	Repository List View.
+	'''
 	def __init__(self, parent, account, tracker):
 		super().__init__(parent)
 		self.account = account
@@ -86,33 +92,9 @@ class RepoList(ScrollFrame):
 		self.__setup()
 
 	def __setup(self):
-#		self.scroll_frame.configure(width=300, bg='#ababab')
-#		self.grid_columnconfigure(0, weight=1)
-
 		for i, repo in enumerate(self.account.repos):
-#			RepoListItem(self.scroll_frame, repo, self.tracker).pack(
-#				fill='x', expand=True)
 			RepoListItem(self.scroll_frame, repo, self.tracker).grid(
-				row=i, column=0, sticky='nswe')
-
-'''
-class RepoList(tk.Frame):
-	def __init__(self, parent, account, tracker):
-		super().__init__(parent)
-		self.account = account
-		self.tracker = tracker
-		self.__setup()
-
-	def __setup(self):
-		self.configure(width=300, bg='#ababab')
-		self.grid_columnconfigure(0, weight=1)
-
-		for i, repo in enumerate(self.account.repos):
-			RepoListItem(self, repo, self.tracker).grid(
-				row=i, column=0, sticky='nswe')
-			if i == 4:
-				break
-'''
+				row=i, column=0, sticky='we')
 
 
 '''
@@ -127,6 +109,9 @@ class RepoList(tk.Frame):
 +---------------+---------------+---------------+
 '''
 class RepoListItem(tk.Frame):
+	'''
+	Single Repository item used in RepoList class.
+	'''
 	def __init__(self, parent, repo, tracker):
 		super().__init__(parent)
 		self.repo    = repo
@@ -156,9 +141,6 @@ class RepoListItem(tk.Frame):
 
 			URLLabel(self, self.repo['forked_from'], 'https://github.com' + self.repo['forked_from'],
 				font='Arial 8').grid(row=rowi, column=1, columnspan=2, sticky='nswe')
-
-#			make_label(self, self.repo['forked_from'], 'Arial 8').grid(
-#				row=rowi, column=1, columnspan=2, sticky='nswe')
 			rowi += 1
 
 		if self.repo['description'] != '':
