@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import simpledialog
 import logging
 
 from AccountView import *
@@ -21,6 +22,7 @@ class View:
 		self.root.configure(menu=self.menu)
 		self.menuFile    = tk.Menu(self.menu)
 		self.menuAccount = tk.Menu(self.menu)
+		self.menuView    = tk.Menu(self.menu)
 
 		self.statusbar = tk.Frame(self.root) #StatusBar(self.root)
 		self.mainframe = AccountListView(self.root, tracker)
@@ -50,7 +52,7 @@ class View:
 		self.msglbl.grid(row=0, column=0, sticky='nw')
 
 		if clear_after > 0:
-			self.msglbl.after(clear_after*1000, self.clear)
+			self.msglbl.after(clear_after*1000, self.clearmsg)
 
 	def clearmsg(self):
 		self.msglbl.destroy()
@@ -60,20 +62,30 @@ class View:
 		self.menu.configure(background='#303030', foreground='#fefefe')
 		self.menu.add_cascade(label='File', menu=self.menuFile)
 		self.menu.add_cascade(label='Account', menu=self.menuAccount)
+		self.menu.add_cascade(label='View', menu=self.menuView)
 		self.menuFile.add_command(label="Exit", command=self.root.destroy)
+		self.menuAccount.add_command(label="Add", command=self._add_account)
+		self.menuView.add_command(label="Sort by last commit")
+		self.menuView.add_command(label="Sort by name")
+		self.menuView.add_command(label="Sort by number of repos")
+
 		self.root.grid_columnconfigure(0, weight=1)
 		self.root.grid_rowconfigure(0, weight=1)
 
 		self.statusbar.configure(bg='#303030', height=30,
 			highlightbackground="#454545", highlightthickness=1)
 		self.statusbar.grid(row=1, column=0, sticky='nswe')
-		#self.statusbar.msg('Hello World', 3)
+		self.msg(f'Loaded {len(self.tracker.accounts)} github accounts', 3)
 
 
 
-class StatusBar(tk.Frame):
-	def __init__(self, parent):
-		super().__init__(parent)
 
-
-
+	def _add_account(self):
+		acc_name = simpledialog.askstring(parent=self.root, title='Add account',
+				prompt='Account Name:')
+		if acc_name:
+			self.msg(f"Downloading account info for '{acc_name}' ...", 4)
+			acc = GithubAccount(acc_name)
+			if acc.download(self.tracker.basedir + "/avatars"):
+				self.tracker.accounts.append(acc)
+				self.open_account_list_view()
