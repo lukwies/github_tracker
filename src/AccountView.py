@@ -20,8 +20,9 @@ class AccountView(tk.Frame):
 		self.sideFrame = Sidebar(self, account, tracker)
 		self.repoFrame = RepoList(self, account, tracker)
 
-		self.btnBack = tk.Button(self.tracker.view.statusbar, text='Back',
-					command=self._go_back)
+		self.frBack  = tk.Frame(self, bg='#303030')
+		self.btnBack = tk.Button(self.frBack, text='Back', bg='#808080',
+					cursor='hand2', command=tracker.open_account_list_view)
 		self.__setup()
 
 	def __setup(self):
@@ -31,17 +32,15 @@ class AccountView(tk.Frame):
 		self.sideFrame.grid(row=0, column=0, sticky='nswe')
 		self.repoFrame.grid(row=0, column=1, sticky='nswe')
 
-		self.btnBack.grid(row=0, column=0)
+		self.btnBack.grid(row=0, column=0, sticky='nswe')
+		self.frBack.grid(row=2, column=0, columnspan=2, sticky='nswe')
 
 
-	def _go_back(self):
-		self.btnBack.destroy()
-		self.tracker.view.open_account_list_view()
 
 class Sidebar(tk.Frame):
 	'''
-	The Sidebar is within the left screen side and shows account
-	information.
+	The Sidebar is located at the left side of the screen and shows account
+	information like avatar, username, ...
 	'''
 	def __init__(self, parent, account, tracker):
 		super().__init__(parent)
@@ -83,7 +82,8 @@ class Sidebar(tk.Frame):
 
 class RepoList(ScrollFrame):
 	'''
-	Repository List View.
+	The Repository List View is located on the center/right side
+	of the screen an shows a list with repositories.
 	'''
 	def __init__(self, parent, account, tracker):
 		super().__init__(parent)
@@ -92,10 +92,13 @@ class RepoList(ScrollFrame):
 		self.__setup()
 
 	def __setup(self):
-		for i, repo in enumerate(self.account.repos):
-			RepoListItem(self.scroll_frame, repo, self.tracker).grid(
-				row=i, column=0, sticky='we')
-
+		if len(self.account.repos) > 0:
+			for i, repo in enumerate(self.account.repos):
+				RepoListItem(self.scroll_frame, repo, self.tracker).grid(
+					row=i, column=0, sticky='we')
+		else:
+			tk.Label(self.scroll_frame, text='No repositories :-(',
+				font='Arial 12 bold').grid(row=0, column=0, sticky='nswe')
 
 '''
 +---------------+---------------+---------------+
@@ -150,6 +153,7 @@ class RepoListItem(tk.Frame):
 
 
 
-
+## TODO REMOVE
 def make_label(parent, text, font, fg='black'):
 	return tk.Label(parent, text=text, font=font, fg=fg, justify='left', anchor='w')
+
