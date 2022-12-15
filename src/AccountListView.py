@@ -1,6 +1,6 @@
 import tkinter as tk
 from AccountListFrame import *
-
+from GithubAccount import *
 
 
 class AccountListView(tk.Frame):
@@ -10,6 +10,7 @@ class AccountListView(tk.Frame):
 		Account list view.
 
 		Args:
+			parent:  Parent tkinter widget
 			tracker: GithubTracker instance
 		'''
 		super().__init__(parent)
@@ -22,8 +23,7 @@ class AccountListView(tk.Frame):
 
 		self.grid_columnconfigure(0, weight=1)
 
-		y=0
-		for account in self.tracker.accounts:
-			AccountListFrame(self, account, self.tracker).grid(
-				row=y, column=0, sticky='nswe')
-			y += 1
+		for i, acc in enumerate(self.tracker.accounts):
+			AccountListFrame(self, acc, self.tracker).grid(
+					row=i, column=0, sticky='nswe')
+
