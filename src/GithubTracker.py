@@ -38,7 +38,7 @@ class GithubTracker:
 
 	def status_msg(self, text, clear_after=0):
 		if self.view != None:
-			self.view.statusbar.msg(text, clear_after)
+			self.view.msg(text, clear_after)
 		logging.info(text)
 
 
@@ -68,7 +68,7 @@ class GithubTracker:
 
 		# Read account names from file 'accounts.txt' if exists.
 		accounts_file = self.basedir + "/accounts.txt"
-		account_names = []
+		self.account_names = []
 
 		if os.path.isfile(accounts_file):
 			with open(accounts_file, 'r') as file:
@@ -84,4 +84,37 @@ class GithubTracker:
 		'''
 		p = os.path.join(self.basedir, 'accounts.txt')
 		with open(p, 'w') as file:
-			[ f.write(name + '\n') for name in self.account_names ]
+			[ file.write(name + '\n') for name in self.account_names ]
+
+
+	def add_account(self, account_name):
+		'''
+		Download github account info for given account name and
+		add it to the account list. To store the account permanently
+		write all account names to a text file (basedir/accounts.txt)
+		'''
+
+		if account_name in self.account_names:
+			self.status_msg(f"Account '{account_name}' already exists", 3)
+			return False
+
+		account = GithubAccount(account_name)
+		self.status_msg(f"Downloading account '{account_name}' ...", 4)
+
+		if account.download(os.path.join(self.basedir, 'avatars')):
+			self.account_names.append(account_name)
+			self.accounts.append(account)
+			self.store_account_names()
+			return True
+
+		return False
+
+
+	def delete_account(self, account):
+		'''
+		Delete given account from the account list. To delete the account
+		permanently overwrite the accounts.txt file (basedir/accounts.txt).
+		'''
+		self.account_names.remove(account.username)
+		self.accounts.remove(account)
+		self.store_account_names()
