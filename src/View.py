@@ -67,9 +67,12 @@ class View:
 		self.menu.add_cascade(label='View', menu=self.menuView)
 		self.menuFile.add_command(label="Exit", command=self.root.destroy)
 		self.menuAccount.add_command(label="Add", command=self._add_account)
-		self.menuView.add_command(label="Sort by last commit")
-		self.menuView.add_command(label="Sort by name")
-		self.menuView.add_command(label="Sort by number of repos")
+		self.menuView.add_command(label="Sort by last commit",
+				command=lambda: self.tracker.sort_accounts('commit'))
+		self.menuView.add_command(label="Sort by name",
+				command=lambda: self.tracker.sort_accounts('name', False))
+		self.menuView.add_command(label="Sort by number of repos",
+				command=lambda: self.tracker.sort_accounts('repos'))
 
 		self.root.grid_columnconfigure(0, weight=1)
 		self.root.grid_rowconfigure(0, weight=1)
