@@ -140,7 +140,7 @@ class GithubAccount:
 		return BeautifulSoup(resp.text, 'html.parser')
 
 	def _download_avatar(self, avatar_directory):
-		self.avatar_file = avatar_directory + '/' + self.username + '.jpg'
+		self.avatar_file = os.path.join(avatar_directory, self.username + '.jpg')
 
 		# Only download avatar image if it does not already exist
 		if not os.path.isfile(self.avatar_file):

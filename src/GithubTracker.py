@@ -15,7 +15,7 @@ class GithubTracker:
 
 	def __init__(self):
 		logging.basicConfig(level=LOGLEVEL, format=LOGFMT)
-		self.basedir = expanduser("~") + '/' + BASEDIR
+		self.basedir = os.path.join(expanduser("~"), BASEDIR)
 		self.account_names = []	# List with account names read from accounts.txt
 		self.accounts = []	# List with GithubAccount instances
 		self.view = None
@@ -27,7 +27,7 @@ class GithubTracker:
 		# Scrape all github accounts we have a name for
 		for aname in self.account_names:
 			acc = GithubAccount(aname)
-			if acc.download(self.basedir + "/avatars"):
+			if acc.download(os.path.join(self.basedir, "avatars")):
 				self.accounts.append(acc)
 
 		# Sort accounts by last commit
@@ -60,14 +60,14 @@ class GithubTracker:
 			try:
 				logging.info("Creating config directory at '{self.basedir}'")
 				os.mkdir(self.basedir)
-				os.mkdir(self.basedir + "/avatars")
+				os.mkdir(os.path.join(self.basedir, "avatars"))
 			except:
 				logging.error(f"Failed to create config directory '{self.basedir}'")
 				sys.exit(1)
 
 
 		# Read account names from file 'accounts.txt' if exists.
-		accounts_file = self.basedir + "/accounts.txt"
+		accounts_file = os.path.join(self.basedir, "accounts.txt")
 		self.account_names = []
 
 		if os.path.isfile(accounts_file):
@@ -75,8 +75,9 @@ class GithubTracker:
 				lines = file.readlines()
 
 			for line in lines:
-				if line[0] != '#':
-					self.account_names.append(line.strip())
+				line = line.strip()
+				if len(line) > 0 and line[0] != '#':
+					self.account_names.append(line)
 
 	def store_account_names(self):
 		'''
@@ -118,3 +119,8 @@ class GithubTracker:
 		self.account_names.remove(account.username)
 		self.accounts.remove(account)
 		self.store_account_names()
+
+	# TODO ???
+	def open_account_list_view(self):
+		if self.view != None:
+			self.view.open_account_list_view()
