@@ -2,6 +2,7 @@ import tkinter as tk
 from PIL import Image,ImageTk
 import webbrowser
 from widgets import URLLabel
+from tkinter.messagebox import askyesno
 
 #
 # +—————————————————————————————————————————————————————+
@@ -35,7 +36,8 @@ class AccountListFrame(tk.Frame):
 		self.account   = account
 		self.tracker   = tracker
 		self.avatar    = tk.Label(self)
-		self.btnDelete = tk.Button(self, text='X', font='Arial 7', fg='red')
+		self.btnDelete = tk.Button(self, text='X', font='Arial 7', fg='red',
+					command=lambda: self._confirm_and_delete(account))
 		self.__setup()
 
 
@@ -90,3 +92,10 @@ class AccountListFrame(tk.Frame):
 	def _open_account(self, ev):
 		self.tracker.view.open_account_view(self.account)
 
+
+	def _confirm_and_delete(self, account):
+		yes = askyesno(title='Delete Account',
+			message=f'Do you really want to delete {account.username}?')
+		if yes:
+			self.tracker.delete_account(account)
+			self.tracker.view.open_account_list_view()
