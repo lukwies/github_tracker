@@ -18,6 +18,7 @@ class GithubTracker:
 		self.basedir = expanduser("~") + '/' + BASEDIR
 		self.account_names = []	# List with account names read from accounts.txt
 		self.accounts = []	# List with GithubAccount instances
+		self.view = None
 
 
 	def run(self, config_path=None):
@@ -29,8 +30,16 @@ class GithubTracker:
 			if acc.download(self.basedir + "/avatars"):
 				self.accounts.append(acc)
 
+		# Sort accounts by last commit
+#		self.accounts.sort(key=lambda x: x.
+
 		self.view = View(self)
 		self.view.run()
+
+	def status_msg(self, text, clear_after=0):
+		if self.view != None:
+			self.view.statusbar.msg(text, clear_after)
+		logging.info(text)
 
 
 	def load_configs(self, config_path=None):
@@ -68,3 +77,11 @@ class GithubTracker:
 			for line in lines:
 				if line[0] != '#':
 					self.account_names.append(line.strip())
+
+	def store_account_names(self):
+		'''
+		Store account names to ~/.github_tracker/accounts.txt
+		'''
+		p = os.path.join(self.basedir, 'accounts.txt')
+		with open(p, 'w') as file:
+			[ f.write(name + '\n') for name in self.account_names ]
