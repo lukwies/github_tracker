@@ -15,22 +15,22 @@ class ScrollFrame(ttk.Frame):
 	'''
 	def __init__(self, container, *args, **kwargs):
 		super().__init__(container, *args, **kwargs)
-		canvas = tk.Canvas(self)
-		scrollbar = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
-		self.scroll_frame = ttk.Frame(canvas)
+		self.canvas = tk.Canvas(self)
+		self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+		self.scroll_frame = ttk.Frame(self.canvas)
 
 		self.scroll_frame.bind(
 			"<Configure>",
-			lambda e: canvas.configure(
-				scrollregion=canvas.bbox("all")
+			lambda e: self.canvas.configure(
+				scrollregion=self.canvas.bbox("all")
 			)
 		)
 
-		canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
-		canvas.configure(yscrollcommand=scrollbar.set)
+		self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
+		self.canvas.configure(yscrollcommand=self.scrollbar.set)
 
-		canvas.pack(side="left", fill="both", expand=True)
-		scrollbar.pack(side="right", fill="y")
+		self.canvas.pack(side="left", fill="both", expand=True)
+		self.scrollbar.pack(side="right", fill="y")
 
 class URLLabel(tk.Label):
 	'''
@@ -66,3 +66,13 @@ class LeftLabel(tk.Label):
 	def __init__(self, parent, *args, **kwargs):
 		super().__init__(parent, *args, **kwargs)
 		self.configure(anchor='w', justify='left')
+
+
+class ClickableLeftLabel(tk.Label):
+	'''
+	Clickable left justified label
+	'''
+	def __init__(self, parent, command, fg_hover='blue', *args, **kwargs):
+		super().__init__(parent, cursor='hand2', *args, **kwargs)
+		self.configure(anchor='w', justify='left')
+		self.bind('<Button-1>', command)
