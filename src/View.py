@@ -78,14 +78,10 @@ class View:
 		self.msg(f'Loaded {len(self.tracker.accounts)} github accounts', 3)
 
 
-
-
 	def _add_account(self):
 		acc_name = simpledialog.askstring(parent=self.root, title='Add account',
 				prompt='Account Name:')
 		if acc_name:
-			self.msg(f"Downloading account info for '{acc_name}' ...", 4)
-			acc = GithubAccount(acc_name)
-			if acc.download(self.tracker.basedir + "/avatars"):
-				self.tracker.accounts.append(acc)
-				self.open_account_list_view()
+			self.tracker.add_account(acc_name)
+			self.open_account_list_view()
+
