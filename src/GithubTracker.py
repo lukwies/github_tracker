@@ -120,7 +120,16 @@ class GithubTracker:
 		self.accounts.remove(account)
 		self.store_account_names()
 
-	# TODO ???
-	def open_account_list_view(self):
-		if self.view != None:
-			self.view.open_account_list_view()
+	def sort_accounts(self, by='commit', ascending=True):
+		if by == 'commit':
+			self.accounts.sort(key=lambda x: x.last_commit, reverse=ascending)
+			self.status_msg('Sorted by date of last commit', 3)
+		elif by == 'repos':
+			self.accounts.sort(key=lambda x: len(x.repos), reverse=ascending)
+			self.status_msg('Sorted by number of repositories', 3)
+		elif by == 'name':
+			self.accounts.sort(key=lambda x: x.username, reverse=ascending)
+			self.status_msg('Sorted by name of account', 3)
+
+		self.view.open_account_list_view()
+

@@ -2,7 +2,7 @@ import tkinter as tk
 from PIL import Image,ImageTk
 from widgets import *
 import textwrap
-
+from datetime import datetime
 
 
 class AccountView(tk.Frame):
@@ -22,7 +22,7 @@ class AccountView(tk.Frame):
 
 		self.frBack  = tk.Frame(self, bg='#303030')
 		self.btnBack = tk.Button(self.frBack, text='Back', bg='#808080',
-					cursor='hand2', command=tracker.open_account_list_view)
+					cursor='hand2', command=tracker.view.open_account_list_view)
 		self.__setup()
 
 	def __setup(self):
@@ -133,8 +133,16 @@ class RepoListItem(tk.Frame):
 
 		make_label(self, 'Last commit:', 'Arial 8 bold').grid(
 			row=1, column=0, sticky='nswe')
-		make_label(self, self.repo['last_update'].strftime('%c'), 'Arial 8').grid(
-			row=1, column=1, columnspan=2, sticky='nswe')
+
+		# If repository was commited today, print red date
+		d = self.repo['last_update']
+		if d.date() == datetime.today().date():
+			LeftLabel(self, text=d.strftime('%c'), font='Arial 8 bold',
+				fg='#E00000').grid(
+				row=1, column=1, columnspan=2, sticky='nswe')
+		else:
+			LeftLabel(self, text=d.strftime('%c'), font='Arial 8').grid(
+				row=1, column=1, columnspan=2, sticky='nswe')
 
 		rowi = 2
 

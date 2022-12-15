@@ -50,7 +50,7 @@ class View:
 		self.mainframe.grid(row=0, column=0, sticky='nswe')
 
 	def msg(self, text, clear_after=0, fg='#f8f8f8'):
-		self.msglbl = LeftLabel(self.root, text=' '+text, font='Arial 11',
+		self.msglbl = LeftLabel(self.root, text=' '+text, font='Arial 9',
 				fg=fg, bg='#303030')
 		self.msglbl.grid(row=1, column=0, sticky='nswe')
 		if clear_after > 0:
@@ -66,6 +66,7 @@ class View:
 		self.menu.add_cascade(label='Account', menu=self.menuAccount)
 		self.menu.add_cascade(label='View', menu=self.menuView)
 		self.menuFile.add_command(label="Exit", command=self.root.destroy)
+		self.menuFile.add_command(label="Delete all Avatars")
 		self.menuAccount.add_command(label="Add", command=self._add_account)
 		self.menuView.add_command(label="Sort by last commit",
 				command=lambda: self.tracker.sort_accounts('commit'))

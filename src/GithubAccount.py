@@ -17,6 +17,7 @@ class GithubAccount:
 		self.avatar_url  = ""          	# Url to avatar image
 		self.avatar_file = ""		# Local path to avatar file
 		self.repos       = []          	# List with repositories
+		self.last_commit = None		# Last commit date
 
 
 	def download(self, avatar_directory=None):
@@ -40,7 +41,30 @@ class GithubAccount:
 		# download/save avatar image
 		self._download_avatar(avatar_directory)
 
+		# Store last commit date (If there's any repo)
+		if len(self.repos) > 0:
+			self.last_commit = self.repos[0]['last_update']
+
 		return True
+
+	def commited_today(self):
+		'''
+		Returns True if any repository of this account has
+		been updated.
+		'''
+		if not self.has_repos():
+			return False
+		elif self.repos[0]['last_update'].date() != datetime.today().date():
+			return False
+		else:
+			return True
+
+
+	def has_repos(self):
+		'''
+		Returns True if account has any repositories.
+		'''
+		return True if len(self.repos) > 0 else False
 
 
 	def print(self):
@@ -53,6 +77,8 @@ class GithubAccount:
 		print(f'Avatar:    {self.avatar}')
 		print('Repositories')
 		print(self.repos)
+
+
 
 
 	def _parse_repositories(self, soup):

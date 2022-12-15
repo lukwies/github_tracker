@@ -1,7 +1,7 @@
 import tkinter as tk
 from PIL import Image,ImageTk
 import webbrowser
-from widgets import URLLabel
+from widgets import *
 from tkinter.messagebox import askyesno
 
 #
@@ -65,27 +65,39 @@ class AccountListFrame(tk.Frame):
 		win = tk.PanedWindow(self, cursor='hand2')
 		win.grid_columnconfigure(1, weight=1)
 
-		self._lbl(win, self.account.username, 'Arial 11 bold').grid(row=0, column=0, sticky='nswe', columnspan=2)
+		self._lbl(win, text=self.account.username, font='Arial 11 bold').grid(
+			row=0, column=0, sticky='nswe', columnspan=2)
 
 		if len(self.account.repos) > 0:
-			self._lbl(win, 'Repos:', 'Arial 8 bold').grid(row=1, column=0, sticky='nswe')
-			self._lbl(win, str(len(self.account.repos)), 'Arial 8').grid(row=1, column=1, sticky='nswe')
+			self._lbl(win, text='Repos:', font='Arial 8 bold').grid(
+				row=1, column=0, sticky='nswe')
+			self._lbl(win, text=str(len(self.account.repos)), font='Arial 8').grid(
+				row=1, column=1, sticky='nswe')
 
-			self._lbl(win, 'Last Commit:', 'Arial 8 bold').grid(row=2, column=0, sticky='nswe')
-			self._lbl(win, self.account.repos[0]['last_update'].strftime('%Y-%m-%d %H:%S'), 'Arial 8').grid(
+			self._lbl(win, text='Last Commit:', font='Arial 8 bold').grid(
+				row=2, column=0, sticky='nswe')
+
+			# Print last commit in other color if commit date was today.
+			sdate = self.account.last_commit.strftime('%Y-%m-%d %H:%S')
+			if self.account.commited_today():
+				l = self._lbl(win, text=sdate, font='Arial 8 bold', fg='red').grid(
+					row=2, column=1, sticky='nswe')
+			else:
+				l = self._lbl(win, text=sdate, font='Arial 8').grid(
 					row=2, column=1, sticky='nswe')
 
-			self._lbl(win, 'Last Repo:', 'Arial 8 bold').grid(row=3, column=0, sticky='nswe')
-			self._lbl(win, self.account.repos[0]['name'], 'Arial 8').grid(row=3, column=1, sticky='nswe')
+			self._lbl(win, text='Last Repo:', font='Arial 8 bold').grid(
+				row=3, column=0, sticky='nswe')
+			self._lbl(win, text=self.account.repos[0]['name'], font='Arial 8').grid(
+				row=3, column=1, sticky='nswe')
 
 #			URLLabel(win, 'Link', 'https://github.com').grid(row=4, column=0, sticky='nswe')
 
 		return win
 
 
-	def _lbl(self, parent, text, font='Arial 10 bold'):
-		lbl = tk.Label(parent, text=text, font=font,
-				justify='left', anchor='w', padx=5)
+	def _lbl(self, parent, *args, **kwargs):
+		lbl = LeftLabel(parent, *args, **kwargs)
 		lbl.bind('<Button-1>', self._open_account)
 		return lbl
 
