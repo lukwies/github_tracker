@@ -4,6 +4,7 @@ import logging
 
 from AccountView import *
 from AccountListView import *
+from AvatarView import *
 from widgets import *
 
 class View:
@@ -28,10 +29,8 @@ class View:
 		self.mainframe = AccountListView(self.root, tracker)
 		self.mainframe.grid(row=0, column=0, sticky='nswe')
 		self.msgframe = None
-#		self.statusbar = tk.Frame(self.root) #StatusBar(self.root)
 
 		self._setup()
-#		self.msg('Hello World', 4)
 
 
 	def run(self):
@@ -48,6 +47,9 @@ class View:
 		logging.info(f"Open account '{account.username}'")
 		self.mainframe = AccountView(self.root, account, self.tracker)
 		self.mainframe.grid(row=0, column=0, sticky='nswe')
+
+	def open_avatar_view(self, account):
+		AvatarView(self.root, account)
 
 	def msg(self, text, clear_after=0, fg='#f8f8f8'):
 		self.msglbl = LeftLabel(self.root, text=' '+text, font='Arial 9',
