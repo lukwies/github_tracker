@@ -8,7 +8,7 @@ so I made some experiments in web scraping and html parsing and this is what hap
 
 ## Usage
 
-	`python main.py`
+´$ python main.py´
 
 ## Install
 
