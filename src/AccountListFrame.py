@@ -2,7 +2,9 @@ import tkinter as tk
 from PIL import Image,ImageTk
 import webbrowser
 from widgets import *
+from util import *
 from tkinter.messagebox import askyesno
+
 
 #
 # +—————————————————————————————————————————————————————+
@@ -45,9 +47,11 @@ class AccountListFrame(tk.Frame):
 		self.configure(bg='#bcbcbc', padx=5, pady=3, highlightbackground="#323232", highlightthickness=1)
 		self.grid_columnconfigure(1, weight=1)
 
-		# Avatar image
-		self.img    = ImageTk.PhotoImage(Image.open(self.account.avatar_file).resize((70,70)))
-		self.avatar = tk.Label(self, width=70, height=70, image=self.img)
+		# Avatar image (Click to open avatar view)
+		self.img    = ImageTk.PhotoImage(Image.open(self.account.avatar_file).resize((75,75)))
+		self.avatar = tk.Label(self, width=75, height=75, image=self.img, cursor='hand2')
+		go_back = lambda ev: self.tracker.view.open_avatar_view(self.account)
+		self.avatar.bind('<Button-1>', go_back)
 #		self.avatar.configure(highlightbackground="#626262", highlightthickness=1)
 		self.avatar.grid(row=0, column=0, rowspan=4, sticky='nw')
 
@@ -62,23 +66,19 @@ class AccountListFrame(tk.Frame):
 
 
 	def _get_labelpanel(self):
-		win = tk.PanedWindow(self, cursor='hand2')
+		win = tk.PanedWindow(self, cursor='hand2', bg='#f9f9f9')
 		win.grid_columnconfigure(1, weight=1)
 
-		self._lbl(win, text=self.account.username, font='Arial 11 bold').grid(
+		self._lbl(win, '#D5D5D5', text=self.account.username, font='Arial 12 bold').grid(
 			row=0, column=0, sticky='nswe', columnspan=2)
 
 		if len(self.account.repos) > 0:
-			self._lbl(win, text='Repos:', font='Arial 8 bold').grid(
-				row=1, column=0, sticky='nswe')
-			self._lbl(win, text=str(len(self.account.repos)), font='Arial 8').grid(
-				row=1, column=1, sticky='nswe')
 
-			self._lbl(win, text='Last Commit:', font='Arial 8 bold').grid(
-				row=2, column=0, sticky='nswe')
+			self._lbl(win, text='Last Commit:', font='Arial 9 bold').grid(
+				row=1, column=0, sticky='nswe')
 
 			# Print last commit in other color if commit date was today.
-			sdate = self.account.last_commit.strftime('%Y-%m-%d %H:%S')
+			sdate = get_time_exceeded(self.account.last_commit)
 			if self.account.commited_today():
 				l = self._lbl(win, text=sdate, font='Arial 8 bold', fg='red').grid(
 					row=2, column=1, sticky='nswe')
@@ -86,9 +86,14 @@ class AccountListFrame(tk.Frame):
 				l = self._lbl(win, text=sdate, font='Arial 8').grid(
 					row=2, column=1, sticky='nswe')
 
-			self._lbl(win, text='Last Repo:', font='Arial 8 bold').grid(
+#			self._lbl(win, text='Last Repo:', font='Arial 8 bold').grid(
+#				row=2, column=0, sticky='nswe')
+			self._lbl(win, text=self.account.repos[0]['name'], font='Arial 9').grid(
+				row=1, column=1, sticky='nswe')
+
+			self._lbl(win, text='Repositories:', font='Arial 9 bold').grid(
 				row=3, column=0, sticky='nswe')
-			self._lbl(win, text=self.account.repos[0]['name'], font='Arial 8').grid(
+			self._lbl(win, text=str(len(self.account.repos)), font='Arial 9').grid(
 				row=3, column=1, sticky='nswe')
 
 #			URLLabel(win, 'Link', 'https://github.com').grid(row=4, column=0, sticky='nswe')
@@ -96,8 +101,8 @@ class AccountListFrame(tk.Frame):
 		return win
 
 
-	def _lbl(self, parent, *args, **kwargs):
-		lbl = LeftLabel(parent, *args, **kwargs)
+	def _lbl(self, parent, bg='#f9f9f9', *args, **kwargs):
+		lbl = LeftLabel(parent, bg=bg, *args, **kwargs)
 		lbl.bind('<Button-1>', self._open_account)
 		return lbl
 
