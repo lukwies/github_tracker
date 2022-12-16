@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import webbrowser
+from tkinter import font
 
 class ScrollFrame(ttk.Frame):
 	'''
@@ -32,11 +33,15 @@ class ScrollFrame(ttk.Frame):
 		self.canvas.pack(side="left", fill="both", expand=True)
 		self.scrollbar.pack(side="right", fill="y")
 
+
 class URLLabel(tk.Label):
 	'''
 	Label which can be clicked to open an URL within the default webbrowser.
+	On mouse hover the font color will change to self.fg_hover and the text
+	will shown underlined.
 	'''
-	def __init__(self, parent, text, url, font='Arial 8', fg='black', fg_hover='blue', **kwargs):
+	def __init__(self, parent, text, url, font='Arial 8', bg='#f5f5f5',
+			fg='black', fg_hover='blue', **kwargs):
 		super().__init__(parent, text=text, font=font, fg=fg, cursor='hand2')
 
 		self.fg_      = fg
@@ -50,10 +55,14 @@ class URLLabel(tk.Label):
 		self.configure(justify='left', anchor='w')
 
 	def enter(self, ev):
-		self.configure(fg=self.fg_hover)
+		f = font.Font(self, self.cget("font"))
+		f.configure(underline=True)
+		self.configure(fg=self.fg_hover, font=f)
 
 	def leave(self, ev):
-		self.configure(fg=self.fg_)
+		f = font.Font(self, self.cget("font"))
+		f.configure(underline=False)
+		self.configure(fg=self.fg_, font=f)
 
 	def openURL(self, ev):
 		webbrowser.open_new_tab(self.url)
