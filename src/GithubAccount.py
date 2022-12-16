@@ -6,7 +6,10 @@ import logging
 import os
 
 class GithubAccount:
-
+	'''
+	Contains all github account settings like user
+	and repository infos.
+	'''
 	def __init__(self, username):
 		self.username    = username    	# Github username
 		self.realname    = ""          	# Real name
@@ -21,13 +24,21 @@ class GithubAccount:
 
 
 	def download(self, avatar_directory=None):
+		'''
+		Scrapes and parse account from https://github.com/<name>.
+		'''
 
 		logging.info(f"Downloading account '{self.username}' ...")
 
 		url  = f"https://github.com/{self.username}?tab=repositories"
-		soup = self._get_soup(url)
 
-		if not soup:
+		try:
+			soup = self._get_soup(url)
+			if not soup:
+				return False
+		except Exception as ex:
+			logging.error(f"Failed to download/parse account {self.username}")
+			logging.error(ex)
 			return False
 
 		self.realname  = self._parse_real_name(soup)
@@ -43,7 +54,7 @@ class GithubAccount:
 
 		# Store last commit date (If there's any repo)
 		if len(self.repos) > 0:
-			self.last_commit = self.repos[0]['last_update']
+			self.last_commit = self.repos[0]['last_commit']
 
 		return True
 
@@ -54,7 +65,7 @@ class GithubAccount:
 		'''
 		if not self.has_repos():
 			return False
-		elif self.repos[0]['last_update'].date() != datetime.today().date():
+		elif self.repos[0]['last_commit'].date() != datetime.today().date():
 			return False
 		else:
 			return True
@@ -67,18 +78,14 @@ class GithubAccount:
 		return True if len(self.repos) > 0 else False
 
 
-	def print(self):
-		print(f'Username:  {self.username}')
-		print(f'Realname:  {self.realname}')
-		print(f'Userinfo:  {self.userinfo}')
-		print(f'Location:  {self.location}')
-		print(f'Follower:  {self.followers}')
-		print(f'Following: {self.following}')
-		print(f'Avatar:    {self.avatar}')
-		print('Repositories')
-		print(self.repos)
-
-
+	def sort_repos(self, by='commit', reverse=False):
+		'''
+		Sort repositories by commit date or name.
+		'''
+		if by == 'commit':
+			self.repos.sort(key=lambda x: x['last_commit'], reverse=reverse)
+		elif by == 'name':
+			self.repos.sort(key=lambda x: x['name'].casefold(), reverse=reverse)
 
 
 	def _parse_repositories(self, soup):
@@ -91,7 +98,6 @@ class GithubAccount:
 		def get_localtime_from_utcstr(timestr):
 			''' Parses UTC time string in format "%Y-%m-%dT%H:%M:%SZ" to localtime. '''
 			dt = datetime.strptime(timestr, "%Y-%m-%dT%H:%M:%SZ")
-			dt = dt.replace(tzinfo=tz.gettz('UTC'))
 			return dt.astimezone(tz.tzlocal())
 
 		repos = []
@@ -109,7 +115,7 @@ class GithubAccount:
 
 			# Get last commit time and convert to localtime
 			x = li.find('relative-time')['datetime'] #.get_text()
-			repo['last_update'] = get_localtime_from_utcstr(x)
+			repo['last_commit'] = get_localtime_from_utcstr(x)
 
 			# Get url where repo is forked from
 			x = li.find('a', {'class', 'Link--muted'})
@@ -159,8 +165,8 @@ class GithubAccount:
 		resp = requests.get(url)
 
 		if resp.status_code != 200:
-			print(f"! Error: Failed to send request to {url}")
-			print(f"         Status-code={resp.status_code}")
+			logging.error("Invalid response from {url}")
+			logging.error("   Status-code={resp.status_code}")
 			return None
 
 		return BeautifulSoup(resp.text, 'html.parser')
