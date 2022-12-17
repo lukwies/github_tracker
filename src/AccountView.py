@@ -27,7 +27,8 @@ class AccountView(tk.Frame):
 
 		self.frBack  = tk.Frame(self, bg='#303030')
 		self.btnBack = tk.Button(self.frBack, text='Back', bg='#808080',
-					cursor='hand2', command=tracker.view.open_account_list_view)
+					cursor='hand2', command=tracker.view.open_account_list_view,
+					highlightthickness=0)
 		self.setup()
 
 	def setup(self):
@@ -203,7 +204,7 @@ class RepoListItem(tk.Frame):
 
 		# Account description text (Can be empty)
 		if self.repo['description'] != '':
-			info = '\n'.join(textwrap.wrap(self.repo['description'], 120))
+			info = '\n'.join(textwrap.wrap(self.repo['description'], 100))
 			LeftLabel(self, text=info, font='Arial 8', fg=font_col2).grid(
 				row=rowi, column=0, columnspan=3, sticky='nswe')
 			rowi += 1
