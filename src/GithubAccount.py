@@ -36,25 +36,28 @@ class GithubAccount:
 			soup = self._get_soup(url)
 			if not soup:
 				return False
+
+			self.realname  = self._parse_real_name(soup)
+			self.userinfo  = self._parse_user_info(soup)
+			self.location  = self._parse_user_location(soup)
+			self.followers = self._parse_followers(soup)
+			self.following = self._parse_following(soup)
+			self.avatar_url= self._parse_avatar_url(soup)
+			self.repos     = self._parse_repositories(soup)
+
+			# download/save avatar image
+			self._download_avatar(avatar_directory)
+
+			# Store last commit date (If there's any repo)
+			if len(self.repos) > 0:
+				self.last_commit = self.repos[0]['last_commit']
+
+
 		except Exception as ex:
 			logging.error(f"Failed to download/parse account {self.username}")
 			logging.error(ex)
 			return False
 
-		self.realname  = self._parse_real_name(soup)
-		self.userinfo  = self._parse_user_info(soup)
-		self.location  = self._parse_user_location(soup)
-		self.followers = self._parse_followers(soup)
-		self.following = self._parse_following(soup)
-		self.avatar_url= self._parse_avatar_url(soup)
-		self.repos     = self._parse_repositories(soup)
-
-		# download/save avatar image
-		self._download_avatar(avatar_directory)
-
-		# Store last commit date (If there's any repo)
-		if len(self.repos) > 0:
-			self.last_commit = self.repos[0]['last_commit']
 
 		return True
 
