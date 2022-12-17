@@ -40,32 +40,37 @@ class URLLabel(tk.Label):
 	On mouse hover the font color will change to self.fg_hover and the text
 	will shown underlined.
 	'''
-	def __init__(self, parent, text, url, font='Arial 8', bg='#f5f5f5',
-			fg='black', fg_hover='blue', **kwargs):
-		super().__init__(parent, text=text, font=font, fg=fg, cursor='hand2')
+	def __init__(self, parent, url, *args, **kwargs):
+		'''
+		Args:
+			parent:  Parent widget
+			url:     Url to open in browser
+			kwargs:  Arguments, passed to tk.Label()
+		NOTE:
+		'''
+		super().__init__(parent, cursor='hand2', *args, **kwargs)
 
-		self.fg_      = fg
-		self.fg_hover = fg_hover
-		self.url      = url
+		self.url = url
 
-		self.bind('<Enter>', self.enter)
-		self.bind('<Leave>', self.leave)
+		self.bind('<Enter>',    self.enter)
+		self.bind('<Leave>',    self.leave)
 		self.bind('<Button-1>', self.openURL)
-
 		self.configure(justify='left', anchor='w')
+#			fg='#0000ea')
 
 	def enter(self, ev):
 		f = font.Font(self, self.cget("font"))
 		f.configure(underline=True)
-		self.configure(fg=self.fg_hover, font=f)
+		self.configure(font=f)
 
 	def leave(self, ev):
 		f = font.Font(self, self.cget("font"))
 		f.configure(underline=False)
-		self.configure(fg=self.fg_, font=f)
+		self.configure(font=f)
 
 	def openURL(self, ev):
 		webbrowser.open_new_tab(self.url)
+
 
 
 class LeftLabel(tk.Label):
@@ -77,11 +82,48 @@ class LeftLabel(tk.Label):
 		self.configure(anchor='w', justify='left')
 
 
-class ClickableLeftLabel(tk.Label):
+class ButtonLabel(tk.Label):
 	'''
-	Clickable left justified label
+	Clickable label
 	'''
-	def __init__(self, parent, command, fg_hover='blue', *args, **kwargs):
+	def __init__(self, parent, command=None, *args, **kwargs):
 		super().__init__(parent, cursor='hand2', *args, **kwargs)
-		self.configure(anchor='w', justify='left')
-		self.bind('<Button-1>', command)
+		self.cmd = command
+
+		self.bg  = '#c8c8c8'
+		self.fg  = '#323232'
+		self.bg2 = '#999999'
+		self.fg2 = '#121212'
+
+		self.setup()
+
+
+	def set_color(self, fg, bg):
+		self.configure(fg=fg, bg=bg)
+		self.bg = bg
+		self.fg = fg
+
+	def set_hover_color(self, fg, bg):
+		self.bg2 = bg
+		self.fg2 = fg
+
+
+	def setup(self):
+		self.configure( #anchor='w', justify='left',
+			fg=self.fg, bg=self.bg,
+			highlightbackground="#626262",
+			highlightthickness=1)
+		self.bind('<Button-1>', self._on_click)
+		self.bind('<Enter>', self._on_enter)
+		self.bind('<Leave>', self._on_leave)
+
+	def _on_click(self, ev):
+		if self.cmd:
+			self.cmd()
+
+	def _on_enter(self, ev):
+		self.configure(fg=self.fg2, bg=self.bg2)
+
+	def _on_leave(self, ev):
+		self.configure(fg=self.fg, bg=self.bg)
+
