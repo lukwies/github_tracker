@@ -5,6 +5,7 @@ import sys
 
 from View import *
 from GithubAccount import *
+from util import *
 
 BASEDIR  = '.github_tracker'
 LOGLEVEL = logging.INFO
@@ -20,13 +21,13 @@ class GithubTracker:
 		self.namefile  = os.path.join(self.basedir, "accounts.txt")
 		self.account_names = []	# List with account names read from accounts.txt
 		self.accounts = []	# List with GithubAccount instances
-		self.view = None
+		self.view     = None
 
 
 	def run(self, basedir=None):
-		self.load_configs(basedir)
-		self.view = View(self)
-		self.view.run()
+		if self.prepare(basedir):
+			self.view = View(self)
+			self.view.run()
 
 	def status_msg(self, text, clear_after=0):
 		if self.view != None:
@@ -34,14 +35,17 @@ class GithubTracker:
 		logging.info(text)
 
 
-	def load_configs(self, basedir=None):
+	def prepare(self, basedir=None):
 		'''
-		After making sure that the config tree exists, read account names
-		from configdir/accounts.txt.
-		If no config path is given, the default is used (~/.github_tracker).
+		This makes sure everything is setup before starting the gui.
+		1) Check if config dir exists, if not -> create it
+		2) Check if we're connected to the internet and github.com is up
+		3) Load account names from basedir/accounts.txt
 
 		Args:
-			config_path: Alternate config path
+			basedir: Path to config basedir (Default: ~/.github_tracker).
+		Return:
+			True on success, False on error
 		'''
 		if basedir:
 			self.basedir   = basedir
@@ -56,7 +60,16 @@ class GithubTracker:
 				os.mkdir(self.avatardir)
 			except:
 				logging.error(f"Failed to create config directory '{self.basedir}'")
-				sys.exit(1)
+				return False
+
+		# Check if we can reach the internet and github.com is up and running.
+		if not internet_is_reachable():
+			logging.error("Not connected to the internet!")
+			return False
+		elif not page_is_reachable('https://github.com'):
+			logging.error("Host https://github.com seems to be down :-(")
+			logging.error("Please check this manually!")
+			return False
 
 		# Read account names from file 'accounts.txt' if exists.
 		self.account_names = []
@@ -68,7 +81,10 @@ class GithubTracker:
 				line = line.strip()
 				if len(line) > 0 and line[0] != '#':
 					self.account_names.append(line)
-
+		logging.info("Read {} account names from {}"
+				.format(len(self.account_names),
+					self.namefile))
+		return True
 
 	def is_account(self, account_name):
 		'''
@@ -106,3 +122,4 @@ class GithubTracker:
 		'''
 		self.accounts.remove(account)
 		self.store_accounts()
+
