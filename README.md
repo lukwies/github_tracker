@@ -8,8 +8,8 @@ so I made some experiments in web scraping and html parsing and this is what hap
 
 ## Description
 
-github-tracker is a python written tool for scraping account informations from github.com.<br>
-It comes with a nice and simple Tkinter graphical user interface [Screenshots](#Screenshots).<br>
+**github-tracker** is a python written tool for scraping account informations from github.com.<br>
+It comes with a nice and simple Tkinter graphical user interface ([Screenshots](#Screenshots)).<br>
 
 
 ## Start Program
@@ -20,31 +20,31 @@ $ python main.py
 </pre>
 
 
-## Config directory
+## Storage
 
 Since account names and images are stored, a small directory tree is required to exist.<br>
-Running github-tracker the first time, that dirtree will be created.
+Running github-tracker the first time, that directory tree will be created.
 <pre>
 ~/.github_tracker             
    |__ accounts.txt      Textfile holding the account names
    |__ avatars/          Directory for account avatar images
-       |__ user1.jpg
-       |__ user2.jpg
+       |__ account.jpg
+       |__ account.jpg
        |__ ...
 </pre>
 
 
 ## Screenshots
 
-<img width='400' style="float:left;" src='https://raw.githubusercontent.com/lukwies/github_tracker/main/screenshots/screenshot_1.png'>
-<p style="clear:left;"><br>
-    The main view shows all github accounts currently handled by the github-tracker.<br>
+<img width='500' style="float:left;" src='https://raw.githubusercontent.com/lukwies/github_tracker/main/screenshots/screenshot_1.png'>
+<p style="clear:left;">
+    The main view shows all github accounts currently handled by github-tracker.<br>
     Here you can add new accounts or delete existing ones.<br>
     Clicking on the menu item View, different methods can be selected to sort accounts.
 </p>
 <br><br>
-<img width='400' style="clear:both; float:left" src='https://raw.githubusercontent.com/lukwies/github_tracker/main/screenshots/screenshot_2.png'>
-<p style="clear:left;"><br>
+<img width='500' style="clear:both; float:left" src='https://raw.githubusercontent.com/lukwies/github_tracker/main/screenshots/screenshot_2.png'>
+<p style="clear:left;">
     After selecting an account on the previous view, you'll endup at the account view.<br>
     Here you can see more details about the github account owner and all its repositories.<br>
     The repositories can be sorted by last commit date or repo name.<br>
