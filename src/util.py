@@ -29,14 +29,6 @@ def get_time_exceeded(dt):
 	dayDiff  = now.day-dt.day
 	dayDiff2 = (now - dt.replace(tzinfo=None)).days
 
-#	print(f"Date: {dt.strftime('%Y-%m-%d %H:%M:%S')}")
-#	print(f"Now:  {now.strftime('%Y-%m-%d %H:%M:%S')}")
-#	print(f"Days: {dayDiff}")
-#	print(f"Ddif: {(now-dt).days}")
-#	print(f"Hour: {hourDiff}")
-#	print(f"Min:  {minDiff}")
-#	print(f"Sec:  {secDiff}")
-
 	def fmt_timediff(val, typ):
 		if val == 1:
 			return str(val) + ' ' + typ
@@ -54,6 +46,3 @@ def get_time_exceeded(dt):
 	else:
 		return fmt_timediff(dayDiff2, "day")
 
-#fmt = '%Y-%m-%d %H:%M:%S'
-#dt = datetime.strptime('2022-12-15 15:45:22', fmt)
-#print(get_time_exceeded(dt))
