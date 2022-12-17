@@ -2,6 +2,7 @@ import tkinter as tk
 from AccountListFrame import *
 from GithubAccount import *
 
+from widgets import LeftLabel
 
 class AccountListView(tk.Frame):
 
@@ -17,6 +18,7 @@ class AccountListView(tk.Frame):
 
 		self.tracker = tracker
 		self.view = view
+		self.frNoAcc = None
 		self.max_row = 0
 		self.setup()
 
@@ -24,6 +26,11 @@ class AccountListView(tk.Frame):
 		'''
 		Add account to List View.
 		'''
+
+		# Remove label showing that there are no accounts available
+		if self.frNoAcc:
+			self.frNoAcc.destroy()
+
 		AccountListFrame(self, account, self.tracker).grid(
 				row=self.max_row, column=0, sticky='nswe')
 		self.max_row += 1
@@ -40,8 +47,38 @@ class AccountListView(tk.Frame):
 
 		self.grid_columnconfigure(0, weight=1)
 
-		for acc in self.tracker.accounts:
-			AccountListFrame(self, acc, self.tracker).grid(
-					row=self.max_row, column=0, sticky='nswe')
-			self.max_row += 1
+		if len(self.tracker.accounts) > 0:
+			# We have acctounts
+			for acc in self.tracker.accounts:
+				AccountListFrame(self, acc, self.tracker).grid(
+						row=self.max_row, column=0, sticky='nswe')
+				self.max_row += 1
+		else:
+			# No accounts, show NoAccountsFrame
+			self.frNoAcc = NoAccountsFrame(self, self.tracker)
+			self.frNoAcc.grid(row=0, column=0, sticky='nswe')
 
+
+class NoAccountsFrame(tk.Frame):
+	'''
+	Frame showing up if no github accounts are available.
+	'''
+	def __init__(self, parent, tracker):
+		super().__init__(parent)
+		self.tracker = tracker
+
+		self.hdr = LeftLabel(self, text='No accounts available!',
+				font='Arial 12 bold')
+		self.text = LeftLabel(self, font='Arial 9')
+		self.setup()
+
+	def setup(self):
+		self.grid_columnconfigure(0, weight=1)
+
+		txt =   "You can add an account either going to menu item Accounts->Add\n"\
+			"and enter any github user name or adding one or more account names\n"\
+			"to the file '{}'.\n".format(self.tracker.namefile)
+		self.text.configure(text=txt)
+
+		self.hdr.grid(row=0, column=0, sticky='nswe')
+		self.text.grid(row=1, column=0, sticky='nswe', pady=5)
