@@ -32,6 +32,7 @@ class View:
 		self.menuView    = tk.Menu(self.menu, tearoff=False)
 
 		self.mainframe = None
+		self.urllbl    = None
 		self.msglbl    = None
 
 		self.setup()
@@ -61,18 +62,38 @@ class View:
 
 	def msg(self, text, clear_after=0, fg='#f8f8f8'):
 		self.clearmsg()
-		self.msglbl = LeftLabel(self.root, text=' '+text, font='Arial 9',
-				fg=fg, bg='#303030')
+		self.msglbl = LeftLabel(self.root, text=' '+text,
+				font='Arial 9', fg=fg, bg='#303030')
 		self.msglbl.grid(row=1, column=0, sticky='nswe')
 		if clear_after > 0:
 			self.msglbl.after(clear_after*1000, self.clearmsg)
 
 	def clearmsg(self):
+		'''
+		Remove the message lable from root window.
+		'''
 		if self.msglbl != None:
 			self.msglbl.destroy()
 
+	def show_hide_url_label(self, url, show=True):
+		'''
+		Show or hide url label from root window.
+		This is used to show the complete url while the user
+		is mouse hovering a URLLabel.
+		'''
+		if show:
+			self.urllbl = LeftLabel(self.root, text=url,
+					font='Arial 12', fg='red')
+			self.urllbl.grid(row=1, column=0,
+				sticky='nswe')
+		else:
+			self.urllbl.destroy()
+			self.urllbl = None
 
 	def setup(self):
+		'''
+		Init gui stuff ...
+		'''
 		self.menu.configure(background='#303030', foreground='#fefefe')
 		self.menu.add_cascade(label='File', menu=self.menuFile)
 		self.menu.add_cascade(label='Account', menu=self.menuAccount)
@@ -107,17 +128,24 @@ class View:
 			self.download_accounts([acc_name])
 
 	def download_accounts(self, account_names):
-		self.menu.entryconfig('File', state='disabled')
-		self.menu.entryconfig('Account', state='disabled')
-		self.menu.entryconfig('View', state='disabled')
+		'''
+		Starts the download thread.
+		'''
+		if len(account_names) > 0:
+			self.menu.entryconfig('File', state='disabled')
+			self.menu.entryconfig('Account', state='disabled')
+			self.menu.entryconfig('View', state='disabled')
 
-		logging.info("Starting download thread ...")
-		download_thread = AccountDownloader(self, self.tracker,
-					account_names)
-		download_thread.start()
-		self.monitor_download(download_thread)
+			logging.info("Starting download thread ...")
+			download_thread = AccountDownloader(self, self.tracker,
+						account_names)
+			download_thread.start()
+			self.monitor_download(download_thread)
 
 	def monitor_download(self, thread):
+		'''
+		Monitor download thread.
+		'''
 		if thread.is_alive():
 			self.root.after(100, lambda: self.monitor_download(thread))
 		else:
@@ -151,7 +179,7 @@ class AccountDownloader(Thread):
 
 		self.pbar = ttk.Progressbar(view.root, orient='horizontal',
 				mode='indeterminate', length=200)
-		self.pbar.grid(row=2, column=0, sticky='nswe')
+		self.pbar.grid(row=3, column=0, sticky='nswe')
 
 	def run(self):
 		'''
@@ -173,7 +201,11 @@ class AccountDownloader(Thread):
 			if acc.download(self.T.avatardir):
 				self.accounts.append(acc)
 				self.V.mainframe.add(acc)
+			else:
+				self.V.msg(f'Download failed', 0, 'red')
+				self.pbar.after(500, self.pbar.destroy)
+				return
 
 		tend = time.time()
 		self.V.msg(f'Done, Time needed: {round(tend-tstart,1)}s', 4)
-		self.pbar.after(1000, self.pbar.destroy)
+		self.pbar.after(500, self.pbar.destroy)
