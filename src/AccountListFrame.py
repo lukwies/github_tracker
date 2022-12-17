@@ -7,12 +7,11 @@ from tkinter.messagebox import askyesno
 
 
 #
-# +—————————————————————————————————————————————————————+
-# |+------+						|
-# ||      | NickName					|
-# ||      | RealName					|
-# ||      | Repos: 32					|
-# |+------+ Last commit: 2022-12-3 22:34		|
+# +—————————————-———————————————————————————————————————+
+# |+-----+ NickName					|
+# ||     | Last Commit:					|
+# ||     | Last Repo:					|
+# |+-----+ Repo Count:					|
 # +—————————————————————————————————————————————————————+
 #
 '''
@@ -38,81 +37,93 @@ class AccountListFrame(tk.Frame):
 		self.account   = account
 		self.tracker   = tracker
 		self.avatar    = tk.Label(self)
-		self.btnDelete = tk.Button(self, text='X', font='Arial 7', fg='red',
-					command=lambda: self._confirm_and_delete(account))
-		self.__setup()
+		self.setup()
 
 
-	def __setup(self):
-		self.configure(bg='#bcbcbc', padx=5, pady=3, highlightbackground="#323232", highlightthickness=1)
-		self.grid_columnconfigure(1, weight=1)
+	def setup(self):
+		self.configure(width=400, bg='#a0a0b0', padx=3, pady=3,
+			highlightbackground="#909090", highlightthickness=1)
+		self.grid_columnconfigure(0, weight=1, minsize=300)
+
+		fr = tk.Frame(self, height=85, cursor='hand2')
+		fr.bind('<Button-1>', self.open_account)
+
 
 		# Avatar image (Click to open avatar view)
-		self.img    = ImageTk.PhotoImage(Image.open(self.account.avatar_file).resize((75,75)))
-		self.avatar = tk.Label(self, width=75, height=75, image=self.img, cursor='hand2')
-		go_back = lambda ev: self.tracker.view.open_avatar_view(self.account)
-		self.avatar.bind('<Button-1>', go_back)
-#		self.avatar.configure(highlightbackground="#626262", highlightthickness=1)
-		self.avatar.grid(row=0, column=0, rowspan=4, sticky='nw')
+		self.img = ImageTk.PhotoImage(Image.open(
+				self.account.avatar_file).resize((75,75)))
+		self.avatar = tk.Label(fr, width=75, height=75,
+				image=self.img, cursor='hand2', bg='#323232')
+		self.avatar.bind('<Button-1>', lambda ev: self.tracker.view.open_avatar_view(self.account))
+		self.avatar.configure(highlightbackground="#323232", highlightthickness=1)
+		self.avatar.place(y=3, x=3)
 
-		# Labels
-		self.lbls = self._get_labelpanel()
-		self.lbls.grid(row=0, column=1, rowspan=4, sticky='nswe', padx=5)
+		# Account username
+		self.lbl(fr, text=self.account.username, font='Arial 14 bold').place(y=2, x=85)
 
-		# Buttons
-		self.btnDelete.grid(row=0, column=2, sticky='nw')
-		self.btnDelete.configure(highlightbackground='#bcbcbc',
-			highlightthickness=1)
-
-
-	def _get_labelpanel(self):
-		win = tk.PanedWindow(self, cursor='hand2', bg='#f9f9f9')
-		win.grid_columnconfigure(1, weight=1)
-
-		self._lbl(win, '#D5D5D5', text=self.account.username, font='Arial 12 bold').grid(
-			row=0, column=0, sticky='nswe', columnspan=2)
 
 		if len(self.account.repos) > 0:
 
-			self._lbl(win, text='Last Commit:', font='Arial 9 bold').grid(
-				row=1, column=0, sticky='nswe')
-
 			# Print last commit in other color if commit date was today.
+			self.lbl(fr, text='Last Commit:', font='Arial 9 bold').place(y=32, x=85)
 			sdate = get_time_exceeded(self.account.last_commit)
+
 			if self.account.commited_today():
-				l = self._lbl(win, text=sdate, font='Arial 8 bold', fg='red').grid(
-					row=2, column=1, sticky='nswe')
+				l = self.lbl(fr, text=sdate, font='Arial 9 bold',
+					fg='red').place(y=32, x=170)
 			else:
-				l = self._lbl(win, text=sdate, font='Arial 8').grid(
-					row=2, column=1, sticky='nswe')
+				l = self.lbl(fr, text=sdate, font='Arial 9').place(y=32, x=170)
 
-#			self._lbl(win, text='Last Repo:', font='Arial 8 bold').grid(
-#				row=2, column=0, sticky='nswe')
-			self._lbl(win, text=self.account.repos[0]['name'], font='Arial 9').grid(
-				row=1, column=1, sticky='nswe')
+			# Last commited repo
+			self.lbl(fr, text='Last Repo:', font='Arial 9 bold').place(y=47, x=85)
+			self.lbl(fr, text=self.account.repos[0]['name'],
+				font='Arial 9').place(y=47, x=170)
 
-			self._lbl(win, text='Repositories:', font='Arial 9 bold').grid(
-				row=3, column=0, sticky='nswe')
-			self._lbl(win, text=str(len(self.account.repos)), font='Arial 9').grid(
-				row=3, column=1, sticky='nswe')
+			# Number of repositories
+			self.lbl(fr, text='Repo Count:', font='Arial 9 bold').place(y=62, x=85)
+			self.lbl(fr, text=str(len(self.account.repos)), font='Arial 9').place(y=62, x=170)
 
-#			URLLabel(win, 'Link', 'https://github.com').grid(row=4, column=0, sticky='nswe')
+		fr.grid(row=0, column=0, sticky='nswe')
 
-		return win
+		# Buttons
+		fr2 = tk.Frame(self, height=85, width=25)
+		btn = ButtonLabel(fr2, command=lambda: self.confirm_and_delete(self.account),
+				text='X', fg='red')
+		btn.set_color('#410000', '#eebbbb')
+		btn.set_hover_color('#550000', '#cc0000')
+		btn.place(y=3, x=3, width=20)
+		fr2.grid(row=0, column=1, sticky='nswe')
 
 
-	def _lbl(self, parent, bg='#f9f9f9', *args, **kwargs):
-		lbl = LeftLabel(parent, bg=bg, *args, **kwargs)
-		lbl.bind('<Button-1>', self._open_account)
+	def lbl(self, parent, *args, **kwargs):
+		lbl = LeftLabel(parent, *args, **kwargs)
 		return lbl
 
-	def _open_account(self, ev):
+	def open_account(self, ev):
 		self.tracker.view.open_account_view(self.account)
 
 
-	def _confirm_and_delete(self, account):
+	def confirm_and_delete(self, account):
 		yes = askyesno(title='Delete Account',
 			message=f'Do you really want to delete {account.username}?')
 		if yes:
 			self.tracker.delete_account(account)
 			self.tracker.view.open_account_list_view()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
