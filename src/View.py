@@ -125,6 +125,7 @@ class View:
 			# Add downloaded accounts to tracker.accounts
 			self.tracker.accounts += thread.accounts
 			self.tracker.sort_accounts('commit')
+			self.tracker.store_accounts()
 			self.menu.entryconfig('File', state='normal')
 			self.menu.entryconfig('Account', state='normal')
 			self.menu.entryconfig('View', state='normal')
