@@ -1,4 +1,5 @@
 import requests
+from requests import ConnectionError
 from bs4 import BeautifulSoup
 from datetime import datetime
 from dateutil import tz
@@ -7,9 +8,19 @@ import os
 
 class GithubAccount:
 	'''
-	Contains all github account settings like user
-	and repository infos.
+	Contains all github account settings like user and repository infos.
+
+	Repository:
+		name		Name of the repo
+		type		Type ('source' or 'fork')
+		url		Url to repo (without prefix)
+		language	Language of repo
+		last_commit	Date of latest commit
+		forked_from	Url to origin repo
+		num_forks	Number of forks on this repo
+		description	Repo description
 	'''
+
 	def __init__(self, username):
 		self.username    = username    	# Github username
 		self.realname    = ""          	# Real name
@@ -28,9 +39,9 @@ class GithubAccount:
 		Scrapes and parse account from https://github.com/<name>.
 		'''
 
-		logging.info(f"Downloading account '{self.username}' ...")
+		logging.info("Downloading account '{}' ...".format(self.username))
 
-		url  = f"https://github.com/{self.username}?tab=repositories"
+		url  = "https://github.com/{}?tab=repositories".format(self.username)
 
 		try:
 			soup = self._get_soup(url)
@@ -53,9 +64,9 @@ class GithubAccount:
 				self.last_commit = self.repos[0]['last_commit']
 
 
-		except Exception as ex:
-			logging.error(f"Failed to download/parse account {self.username}")
-			logging.error(ex)
+		except ConnectionError as er:
+			logging.error("Failed to download/parse account {}".format(self.username))
+			logging.error(er)
 			return False
 
 
@@ -105,7 +116,7 @@ class GithubAccount:
 
 		repos = []
 
-		# Parse repository infos from html
+		# Parse repository infos
 		for li in soup.find_all('li', {'itemprop':'owns'}):
 			repo = {}
 			repo['name'] = li.h3.a.get_text().strip() # Name of repository
@@ -123,6 +134,13 @@ class GithubAccount:
 			# Get url where repo is forked from
 			x = li.find('a', {'class', 'Link--muted'})
 			repo['forked_from'] = '' if not x else x['href']
+
+			# Get number of forks on this repo.
+			x = li.find('div', {'class':'f6 color-fg-muted mt-2'})
+			a = x.find('a') if x else None
+			s = a.get_text().strip().replace(',','') if a else ''
+			repo['num_forks'] = int(s) if s != '' else 0
+			#print("Number of forks: {}".format(repo['num_forks']))
 
 			# Get repository descriptioin
 			x = li.find('p', {'class':'col-9', 'itemprop':'description'})
@@ -168,8 +186,8 @@ class GithubAccount:
 		resp = requests.get(url)
 
 		if resp.status_code != 200:
-			logging.error("Invalid response from {url}")
-			logging.error("   Status-code={resp.status_code}")
+			logging.error("Invalid response from {}".format(url))
+			logging.error("Status-code={}".format(resp.status_code))
 			return None
 
 		return BeautifulSoup(resp.text, 'html.parser')
@@ -180,7 +198,7 @@ class GithubAccount:
 		# Only download avatar image if it does not already exist
 		if not os.path.isfile(self.avatar_file):
 
-			logging.info(f"Downloading avatar to '{self.avatar_file}' ...")
+			logging.info("Downloading avatar to '{}'".format(self.avatar_file))
 			img_data = requests.get(self.avatar_url).content
 
 			with open(self.avatar_file, 'wb') as file:
