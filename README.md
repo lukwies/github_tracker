@@ -21,7 +21,7 @@ Usage: python main.py [OPTIONS ...]
 ## Run
 
 <pre>
-$ cd github_tracker/
+$ cd github_tracker/src/
 $ python main.py
 </pre>
 
