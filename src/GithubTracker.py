@@ -23,15 +23,8 @@ class GithubTracker:
 		self.view = None
 
 
-	def run(self, config_path=None):
-		self.load_configs(config_path)
-
-		# Scrape all github accounts we have a name for
-		#for aname in self.account_names:
-		#	acc = GithubAccount(aname)
-		#	if acc.download(self.avatardir):
-		#		self.accounts.append(acc)
-
+	def run(self, basedir=None):
+		self.load_configs(basedir)
 		self.view = View(self)
 		self.view.run()
 
@@ -41,7 +34,7 @@ class GithubTracker:
 		logging.info(text)
 
 
-	def load_configs(self, config_path=None):
+	def load_configs(self, basedir=None):
 		'''
 		After making sure that the config tree exists, read account names
 		from configdir/accounts.txt.
@@ -50,8 +43,8 @@ class GithubTracker:
 		Args:
 			config_path: Alternate config path
 		'''
-		if config_path:
-			self.basedir   = config_path
+		if basedir:
+			self.basedir   = basedir
 			self.avatardir = os.path.join(self.basedir, "avatars")
 			self.namefile  = os.path.join(self.basedir, "accounts.txt")
 
@@ -98,7 +91,7 @@ class GithubTracker:
 		self.view.open_account_list_view()
 
 
-	def store_account_names(self):
+	def store_accounts(self):
 		'''
 		Store account names to basedir/accounts.txt
 		'''
@@ -112,5 +105,4 @@ class GithubTracker:
 		permanently overwrite the accounts.txt file (basedir/accounts.txt).
 		'''
 		self.accounts.remove(account)
-		self.store_account_names()
-
+		self.store_accounts()
