@@ -32,11 +32,11 @@ class AccountListView(tk.Frame):
                 # Setup menu
 		self.view.menu.entryconfig('Account', state='normal')
 		self.view.menuView.entryconfig('Sort by last commit', state='normal',
-			command=lambda: self.tracker.sort_accounts('commit'))
+			command=lambda: self.tracker.sort_accounts('commit', True))
 		self.view.menuView.entryconfig('Sort by name', state='normal',
 			command=lambda: self.tracker.sort_accounts('name', False))
 		self.view.menuView.entryconfig('Sort by number of repos', state='normal',
-			command=lambda: self.tracker.sort_accounts('repos'))
+			command=lambda: self.tracker.sort_accounts('repos', True))
 
 		self.grid_columnconfigure(0, weight=1)
 
