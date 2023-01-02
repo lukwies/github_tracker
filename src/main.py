@@ -1,11 +1,3 @@
-#
-#
-# -d, --basedir=PATH
-#
-#
-#
-#
-
 from getopt import getopt, GetoptError
 from GithubTracker import *
 
