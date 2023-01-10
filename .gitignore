@@ -1,4 +1,5 @@
 conda-env/
+venv/
 requirements.in
 
 # Byte-compiled / optimized / DLL files
